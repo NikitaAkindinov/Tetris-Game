@@ -11,12 +11,12 @@ namespace ConsoleAppTetris
         private static string emptySpace = "   ";// Символ наполнения пустого пространства.
         private static string item = " * ";    // Символ отображения фигур.
         int startDotWidth; // Начальная точка от которой будет вестись построение фигуры на поле. К ней же прибавляется смещение фигуры
-        int startDotHeight;// Начальная точка от которой будет вестись построение фигуры на поле. К ней же прибавляется смещение фигуры
+        int startDotHeight = 0;// Начальная точка от которой будет вестись построение фигуры на поле. К ней же прибавляется смещение фигуры
         string[,] elementsArray;
-        
 
-        
-        //Свойства
+
+
+        #region//Свойства
         public string[,] ElementsArray
 {
             get
@@ -66,6 +66,8 @@ namespace ConsoleAppTetris
                 this.startDotWidth = value;
             }
         }
+        #endregion
+
         // Конструктор класса
         public Elements(int numberElement)
         {
@@ -116,13 +118,13 @@ namespace ConsoleAppTetris
                 default: break;
             }
         }
-        
-        // Методы поворота фигуры
+
+        // Метод поворота фигуры
         public void Left()
         {
             string[,] temp = new string[elementsArray.GetLength(1), elementsArray.GetLength(0)];
 
-            for (int i = 0, I = elementsArray.GetLength(0) - 1; i < elementsArray.GetLength(0); i++ , I--)
+            for (int i = 0, I = elementsArray.GetLength(0) - 1; i < elementsArray.GetLength(0); i++, I--)
                 for (int j = 0, J = elementsArray.GetLength(1) - 1; j < elementsArray.GetLength(1); j++, J--)
                     temp[J, i] = elementsArray[i, j];
 
@@ -151,173 +153,101 @@ namespace ConsoleAppTetris
         public void ViewClearField()
         {            
             for (int i = 0; i < playingFieled.GetLength(0); i++)// Перебор строк
-            {
                 for (int j = 0; j < playingFieled.GetLength(1); j++)//Перебор столбцов
-                {
                     playingFieled[i, j] = Elements.EmptySpace;
-                }
-            }
-            
         }
 
         /*
          * 0 - Всё хорошо
          * 1 - Ошибка перемещения. Нужно создать новую фигуру
+         * 2 - Игра окончена
          * */
         public int Down(Elements elem)
         {
-
-            //if(!CheckOpenDownPlace(elem)) return 1;
-
+            
             if (elem.StartDotHeight == 0)
             {
-                if (!CheckOpenDownPlace(elem))
-                    return 2;
-                for (int i = 0; i < elem.ElementsArray.GetLength(0); i++)
-                {
-                    for (int j = 0; j < elem.ElementsArray.GetLength(1); j++)
-                    {
-                        if (elem.ElementsArray[i, j]==Elements.Item)
-                        {
-                            playingFieled[elem.StartDotHeight + i, elem.StartDotWidth + j] = elem.ElementsArray[i, j];
-                        }
-                        
-                    }
-                }
                 elem.StartDotHeight++;
+                if (!CheckOpenPlace(elem))
+                    return 2;
             }
             else
             {
-                if (!CheckOpenDownPlace(elem)) return 1;
                 DeliteElemtnts(elem);
-                
-                for (int i = 0; i < elem.ElementsArray.GetLength(0); i++)
-                {
-                    for (int j = 0; j < elem.ElementsArray.GetLength(1); j++)
-                    {
-                        if (elem.ElementsArray[i, j] == Elements.Item)
-                        {
-                            playingFieled[elem.StartDotHeight + i, elem.StartDotWidth + j] = elem.ElementsArray[i, j];
-                        }
-                    }
-                }
                 elem.StartDotHeight++;
+                if (!CheckOpenPlace(elem))
+                {
+                    elem.StartDotHeight--;
+                    BildElement(elem);
+                    return 1;
+                }
             }
+            BildElement(elem);
+
             return 0;
         }
-
-        bool CheckOpenDownPlace(Elements elem) // Готово. Работает
+        public int Turn(Elements elem)// Метод поворота фигуры
         {
-            for (int j = 0; j < elem.ElementsArray.GetLength(1); j++)
+            DeliteElemtnts(elem);
+            elem.Right();
+            if(!CheckOpenPlace(elem))
             {
-                if (elem.ElementsArray[ elem.ElementsArray.GetLength(0) - 1,  j] == Elements.EmptySpace)
-                {
-                    if ((elem.StartDotHeight + elem.ElementsArray.GetLength(0)) - 1 > playingFieled.GetLength(0) || (elem.StartDotWidth + j) >= playingFieled.GetLength(1))
-                        return false;
-                    if (playingFieled[elem.StartDotHeight + elem.ElementsArray.GetLength(0) - 2, elem.StartDotWidth + j] == Elements.Item)
-                        return false;
-                }
-                else
-                {
-                    if ((elem.StartDotHeight + elem.ElementsArray.GetLength(0)) > playingFieled.GetLength(0) || (elem.StartDotWidth + j) >= playingFieled.GetLength(1))
-                        return false;
-                    if (playingFieled[elem.StartDotHeight + elem.ElementsArray.GetLength(0) - 1, elem.StartDotWidth + j] == Elements.Item)
-                        return false;
-                }
-                    
+                elem.Left();
+                BildElement(elem);
+                return 1;
             }
-            
+            BildElement(elem);
+            return 0;
+        }
+        bool CheckOpenPlace(Elements elem) // Готово. Работает
+        {
+            for (int i = 0; i < elem.ElementsArray.GetLength(0); i++)
+                for (int j = 0; j < elem.ElementsArray.GetLength(1); j++)
+                    if (elem.ElementsArray[i, j] == Elements.Item)
+                    {
+                        if (elem.StartDotHeight + i  == playingFieled.GetLength(0))
+                            return false;
+
+                        if (elem.StartDotWidth + j == playingFieled.GetLength(1))
+                            return false;
+
+                        if (elem.StartDotWidth + j == -1)
+                            return false;
+
+                        if (playingFieled[elem.StartDotHeight  + i, elem.StartDotWidth + j] == Elements.Item)
+                            return false;
+                    }
             return true;
         }
 
         public int Left(Elements elem)
-        {
-            if (!CheckOpenLeftPlace(elem)) return 1;
+        {   
             DeliteElemtnts(elem);
-            
-            for (int i = 0; i < elem.ElementsArray.GetLength(0); i++)
-            {
-                for (int j = 0; j < elem.ElementsArray.GetLength(1); j++)
-                {
-                    if (elem.ElementsArray[i, j] == Elements.Item)
-                    {
-                        playingFieled[elem.StartDotHeight + i - 1 , elem.StartDotWidth + j - 1] = elem.ElementsArray[i, j];
-                    }
-                }
-            }
-
             elem.StartDotWidth--;
-            
+            if (!CheckOpenPlace(elem))
+            {
+                elem.StartDotWidth++;
+                BildElement(elem);
+                return 1;
+            }
+            BildElement(elem);
+
             return 0;
         }
-
-        bool CheckOpenLeftPlace(Elements elem)// Готово, работает
-        {
-            for (int i = 0; i < elem.ElementsArray.GetLength(0); i++)
-            {
-                if (elem.ElementsArray[i, 0] == Elements.EmptySpace)
-                {
-                    if (elem.StartDotWidth + i == 0 )
-                        return false;
-                    if (playingFieled[elem.StartDotHeight + i - 1, elem.StartDotWidth] == Elements.Item)
-                        return false;
-                }
-                else
-                {
-                    if (elem.StartDotWidth + i  == 0)
-                        return false;
-                    if (playingFieled[elem.StartDotHeight + i - 1, elem.StartDotWidth - 1] == Elements.Item)
-                        return false;
-                }
-
-            }
-
-            return true;
-        }
-
         public int Right(Elements elem)
         {
-            if (!CheckOpenRightPlace(elem)) return 1;
+            
             DeliteElemtnts(elem);
-
-            for (int i = 0; i < elem.ElementsArray.GetLength(0); i++)
-            {
-                for (int j = 0; j < elem.ElementsArray.GetLength(1); j++)
-                {
-                    if (elem.ElementsArray[i, j] == Elements.Item)
-                    {
-                        playingFieled[elem.StartDotHeight + i - 1, elem.StartDotWidth + j + 1] = elem.ElementsArray[i, j];
-                    }
-                }
-            }
-
             elem.StartDotWidth++;
+            if (!CheckOpenPlace(elem))
+            {
+                elem.StartDotWidth--;
+                BildElement(elem);
+                return 1;
+            }
+            BildElement(elem);
 
             return 0;
-        }
-
-        bool CheckOpenRightPlace(Elements elem)
-        {
-            for (int i = 0; i < elem.ElementsArray.GetLength(0); i++)
-            {
-                if (elem.ElementsArray[i, elem.ElementsArray.GetLength(1) - 1] == Elements.EmptySpace)
-                {
-                    if (elem.StartDotWidth + elem.ElementsArray.GetLength(1)  == playingFieled.GetLength(1))
-                        return false;
-                    if (playingFieled[elem.StartDotHeight  + i - 1, elem.StartDotWidth + elem.ElementsArray.GetLength(1) - 1] == Elements.Item)
-                        return false;
-                }
-                else
-                {
-                    if (elem.StartDotWidth + elem.ElementsArray.GetLength(1)  == playingFieled.GetLength(1) )
-                        return false;
-                    if (playingFieled[elem.StartDotHeight + i , elem.StartDotWidth + elem.ElementsArray.GetLength(1) ] == Elements.Item)
-                        return false;
-                }
-
-            }
-
-            return true;
         }
 
         public void DeliteElemtnts(Elements elem)
@@ -325,21 +255,15 @@ namespace ConsoleAppTetris
             for (int i = 0; i < elem.ElementsArray.GetLength(0); i++)
                 for (int j = 0; j < elem.ElementsArray.GetLength(1); j++)
                     if (elem.ElementsArray[i, j] == Elements.Item)
-                        playingFieled[elem.StartDotHeight - 1 + i, elem.StartDotWidth + j] = Elements.EmptySpace;
+                        playingFieled[elem.StartDotHeight  + i, elem.StartDotWidth + j] = Elements.EmptySpace;
         }
 
         public void BildElement(Elements elem)
         {
             for (int i = 0; i < elem.ElementsArray.GetLength(0); i++)
-            {
                 for (int j = 0; j < elem.ElementsArray.GetLength(1); j++)
-                {
                     if (elem.ElementsArray[i, j] == Elements.Item)
-                    {
-                        playingFieled[elem.StartDotHeight + i - 1, elem.StartDotWidth + j] = elem.ElementsArray[i, j];
-                    }
-                }
-            }
+                        playingFieled[elem.StartDotHeight  + i, elem.StartDotWidth + j] = elem.ElementsArray[i, j];
         }
 
         public static int Height
@@ -382,7 +306,7 @@ namespace ConsoleAppTetris
             Elements element = new Elements(0);
 
             pole.ViewClearField();
-            pole.Down(element);
+            
             //while (true)
             //{
             //    Console.Clear();
@@ -413,7 +337,6 @@ namespace ConsoleAppTetris
                                 case 1:
                                     {
                                         element = new Elements(r.Next(0, kol));
-                                        pole.Down(element);
                                     }
                                     break;
                                 case 2:
@@ -437,19 +360,9 @@ namespace ConsoleAppTetris
                             pole.Right(element);
                         }
                         break;
-                    case ConsoleKey.L:
+                    case ConsoleKey.UpArrow:
                         {
-                            pole.DeliteElemtnts(element);
-                            element.Left();
-                            pole.BildElement(element);
-                            BildField(pole);
-                        }
-                        break;
-                    case ConsoleKey.R:
-                        {
-                            pole.DeliteElemtnts(element);
-                            element.Right();
-                            pole.BildElement(element);
+                            pole.Turn(element);
                             BildField(pole);
                         }
                         break;
