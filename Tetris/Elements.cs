@@ -67,50 +67,69 @@ namespace Tetris
         #endregion
 
         // Конструктор класса
-        public Elements(int numberElement)
+        public Elements(Field field, Random r)
         {
             /* Расшифровка номеров фигур
              * 0 - Квадрат   * *
-             *              * *
+             *               * *
              * 1 - Зигзаг       * *
              *                * * 
-             * 2 - Прямая   * * * * * *
-             * 3 - Уголок   * * * *
+             * 2 - Прямая   * * * * 
+             * 3 - Уголок   * * * 
              *              * 
-             * 4 - Уголок   * * * *
-             *                    * 
+             * 4 - Уголок   * * *
+             *                  * 
+             * 5 - Зигзаг   * *
+             *                * *
+             * 6 - Тешка   *  
+             *           * * *
+             *                  
+             *                  
              */
 
-            switch (numberElement)
+
+            switch (r.Next(7))
             {
                 case 0:
                     {
                         elementsArray = new string[,] { { Item, Item }, { Item, Item } };
-                        StartDotWidth = Field.Width / 2 - elementsArray.GetLength(1) / 2;
+                        StartDotWidth = field.Width / 2 - elementsArray.GetLength(1) / 2;
                     }
                     break;
                 case 1:
                     {
                         elementsArray = new string[,] { { EmptySpace, Item, Item }, { Item, Item, EmptySpace } };
-                        StartDotWidth = Field.Width / 2 - elementsArray.GetLength(1) / 2;
+                        StartDotWidth = field.Width / 2 - elementsArray.GetLength(1) / 2;
                     }
                     break;
                 case 2:
                     {
-                        elementsArray = new string[,] { { Item, Item, Item, Item, Item }, { EmptySpace, EmptySpace, EmptySpace, EmptySpace, EmptySpace } };
-                        StartDotWidth = Field.Width / 2 - elementsArray.GetLength(1) / 2;
+                        elementsArray = new string[,] { { Item, Item, Item, Item }, { EmptySpace, EmptySpace, EmptySpace, EmptySpace } };
+                        StartDotWidth = field.Width / 2 - elementsArray.GetLength(1) / 2;
                     }
                     break;
                 case 3:
                     {
-                        elementsArray = new string[,] { { Item, Item, Item, Item }, { Item, EmptySpace, EmptySpace, EmptySpace } };
-                        StartDotWidth = Field.Width / 2 - elementsArray.GetLength(1) / 2;
+                        elementsArray = new string[,] { { Item, Item, Item }, { Item, EmptySpace, EmptySpace } };
+                        StartDotWidth = field.Width / 2 - elementsArray.GetLength(1) / 2;
                     }
                     break;
                 case 4:
                     {
-                        elementsArray = new string[,] { { Item, Item, Item, Item }, { EmptySpace, EmptySpace, EmptySpace, Item } };
-                        StartDotWidth = Field.Width / 2 - elementsArray.GetLength(1) / 2;
+                        elementsArray = new string[,] { { Item, Item, Item }, { EmptySpace, EmptySpace, Item } };
+                        StartDotWidth = field.Width / 2 - elementsArray.GetLength(1) / 2;
+                    }
+                    break;
+                case 5:
+                    {
+                        elementsArray = new string[,] { { Item, Item, EmptySpace }, {  EmptySpace, Item, Item } };
+                        StartDotWidth = field.Width / 2 - elementsArray.GetLength(1) / 2;
+                    }
+                    break;
+                case 6:
+                    {
+                        elementsArray = new string[,] { { EmptySpace, Item, EmptySpace }, { Item, Item, Item } };
+                        StartDotWidth = field.Width / 2 - elementsArray.GetLength(1) / 2;
                     }
                     break;
 

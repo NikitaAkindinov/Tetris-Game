@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Tetris;
 
@@ -9,37 +10,22 @@ namespace ConsoleAppTetris
 {
     class Program
     {
+        
         static void Main(string[] args)
         {
             Console.Title = "Игра Тетрис";
-            Field pole = new Field();
+            Field pole = new Field(25,10,"###");
             Random r = new Random();
-            int kol = 5;
-            //Elements element = new Elements(r.Next(0, kol));
-            Elements element = new Elements(0);
-
+            
+            Elements element = new Elements(pole,r);
             pole.ViewClearField();
-            
-            //while (true)
-            //{
-            //    Console.Clear();
-            //    BildField(pole);
-            //    System.Threading.Thread.Sleep(1000);
-            //    if(pole.Down(element) == 1)
-            //    {
-            //        element = new Elements(r.Next(0,kol));
-            //    }
-
-            //}
-
-
-            
 
             Console.TreatControlCAsInput = true;
             bool gemeOv = true;
             while (gemeOv)
             {
                 Console.Clear();
+                //System.Threading.Thread.Sleep(1000);
                 BildField(pole);
                 switch (Console.ReadKey().Key)
                 {
@@ -49,14 +35,15 @@ namespace ConsoleAppTetris
                             {
                                 case 1:
                                     {
-                                        element = new Elements(r.Next(0, kol));
+                                        element = new Elements(pole,r);
+                                        pole.DelLine();
                                     }
                                     break;
                                 case 2:
                                     {
                                         Console.Clear();
                                         Console.WriteLine("Игра закончена!");
-                                        if (ConsoleKey.Enter == Console.ReadKey().Key) ;
+                                        Console.ReadKey();
                                         gemeOv = false;
                                     }break;
                                 default: break;
